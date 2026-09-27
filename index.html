@@ -31,6 +31,15 @@
   </div>
   <button id="fullscreen">Full screen</button>
   <script>
+    // Browsers complain when the game asks to capture the mouse while the page isn't focused
+    // (e.g. right after clicking "Full screen"). It's harmless, so don't let it pop up an error box.
+    const harmless = (msg) => /not focused|pointer ?lock|WrongDocumentError|requestPointerLock/i.test(String(msg || ""));
+    window.addEventListener("unhandledrejection", (e) => {
+      if (harmless(e.reason && (e.reason.name + " " + e.reason.message))) { e.preventDefault(); e.stopImmediatePropagation(); }
+    }, true);
+    window.addEventListener("error", (e) => {
+      if (harmless(e.message) || harmless(e.error && e.error.name)) { e.preventDefault(); e.stopImmediatePropagation(); }
+    }, true);
     const canvas = document.getElementById("unity-canvas");
     const fill = document.getElementById("fill");
     const status = document.getElementById("status");
