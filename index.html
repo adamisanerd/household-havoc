@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Household Havoc</title>
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0b0d14; color: #fff;
+                 font-family: "Segoe UI", Arial, sans-serif; }
+    #unity-canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; background: #0b0d14; outline: none; }
+    #loading { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+               background: radial-gradient(ellipse at center, #1b2338 0%, #0b0d14 70%); }
+    #loading h1 { margin: 0; font-size: clamp(32px, 7vw, 84px); letter-spacing: 2px; color: #ffbf4d; text-shadow: 0 4px 0 #000; }
+    #loading p { margin: 0; opacity: .8; font-size: 18px; text-align: center; padding: 0 16px; }
+    #bar { width: min(520px, 80vw); height: 16px; border-radius: 8px; background: #ffffff22; overflow: hidden; }
+    #fill { width: 0%; height: 100%; background: #ffbf4d; transition: width .2s; }
+    #fullscreen { position: fixed; right: 14px; bottom: 14px; padding: 8px 14px; border: 0; border-radius: 6px; background: #000a; color: #fff;
+                  font-size: 14px; cursor: pointer; display: none; }
+    #fullscreen:hover { background: #000d; }
+    #error { color: #ff8080; display: none; max-width: 600px; text-align: center; padding: 0 16px; }
+  </style>
+</head>
+<body>
+  <canvas id="unity-canvas" tabindex="-1"></canvas>
+  <div id="loading">
+    <h1>HOUSEHOLD HAVOC</h1>
+    <div id="bar"><div id="fill"></div></div>
+    <p id="status">Loading the neighborhood... (the first time takes a minute)</p>
+    <p id="error"></p>
+    <p style="opacity:.55;font-size:14px">Works best in Chrome or Edge on a computer with a mouse and keyboard.</p>
+  </div>
+  <button id="fullscreen">Full screen</button>
+  <script>
+    const canvas = document.getElementById("unity-canvas");
+    const fill = document.getElementById("fill");
+    const status = document.getElementById("status");
+    const config = {
+      dataUrl: "Build/HouseholdHavoc_Web.data.unityweb",
+      frameworkUrl: "Build/HouseholdHavoc_Web.framework.js.unityweb",
+      codeUrl: "Build/HouseholdHavoc_Web.wasm.unityweb",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "Family Games",
+      productName: "Household Havoc",
+      productVersion: "1.0",
+      devicePixelRatio: 1,
+    };
+    const script = document.createElement("script");
+    script.src = "Build/HouseholdHavoc_Web.loader.js";
+    script.onload = () => {
+      createUnityInstance(canvas, config, (p) => {
+        fill.style.width = Math.round(p * 100) + "%";
+        if (p >= 0.9) status.textContent = "Almost there... building the world";
+      }).then((instance) => {
+        document.getElementById("loading").style.display = "none";
+        const fs = document.getElementById("fullscreen");
+        fs.style.display = "block";
+        fs.onclick = () => instance.SetFullscreen(1);
+        canvas.focus();
+      }).catch((message) => {
+        const e = document.getElementById("error");
+        e.style.display = "block";
+        e.textContent = "The game couldn't start: " + message;
+      });
+    };
+    document.body.appendChild(script);
+  </script>
+</body>
+</html>
